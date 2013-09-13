@@ -5,9 +5,10 @@ public class BangBangController implements UltrasonicController{
 	private final int motorLow, motorHigh;
 	private final int motorStraight = 100;
 	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
-	private final int BangBangConstant=3;
+	private final int BangBangConstant=5;
 	private final int wallDistance=30;
 	
+	boolean isBack = false;
 	private int distance;
 	private int currentLeftSpeed;
 	private char outerwheel;
@@ -42,7 +43,19 @@ public class BangBangController implements UltrasonicController{
 		else
 			if (error > 0 )
 			{
-				if (distance < 0)
+				
+				if (distance < 10)
+				{
+					leftMotor.setSpeed(motorStraight);
+					rightMotor.backward();
+					isBack = true; 
+					leftMotor.forward();
+				}
+				else
+				if (isBack)
+				{
+					rightMotor.stop();
+				}
 				
 				{
 					//decrease rotation of outer wheel

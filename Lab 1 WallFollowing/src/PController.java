@@ -5,7 +5,10 @@ public class PController implements UltrasonicController {
 	
 	private final int bandCenter, bandwith;
 	private final int motorStraight = 200, FILTER_OUT = 20;
-	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;	
+	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
+	private final int BangBangConstant=5;
+	private final int wallDistance=20;
+	
 	private int distance;
 	private int currentLeftSpeed;
 	private int filterControl;
@@ -37,6 +40,16 @@ public class PController implements UltrasonicController {
 			filterControl = 0;
 			this.distance = distance;
 		}
+		int Rspeed= 10 * distance;
+		int Lspeed = -10 * distance;
+		leftMotor.setSpeed(Rspeed);
+		rightMotor.setSpeed(Lspeed);
+		leftMotor.forward();
+		rightMotor.forward();
+		
+		
+		
+		
 		// TODO: process a movement based on the us distance passed in (P style)
 		
 	}
