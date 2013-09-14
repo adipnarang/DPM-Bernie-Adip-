@@ -1,4 +1,3 @@
-import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.*;
 
 public class PController implements UltrasonicController {
@@ -7,7 +6,8 @@ public class PController implements UltrasonicController {
 	private final int motorStraight = 200, FILTER_OUT = 20;
 	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
 	private final int BangBangConstant=5;
-	private final int wallDistance=20;
+	private final int wallDistance=50;
+	private final int sweetspeed=300;
 	
 	private int distance;
 	private int currentLeftSpeed;
@@ -26,7 +26,8 @@ public class PController implements UltrasonicController {
 	}
 	
 	@Override
-	public void processUSData(int distance) {
+	public void processUSData(int distance) 
+	{
 		
 		// rudimentary filter
 		if (distance == 255 && filterControl < FILTER_OUT) {
@@ -40,12 +41,44 @@ public class PController implements UltrasonicController {
 			filterControl = 0;
 			this.distance = distance;
 		}
-		int Rspeed= 10 * distance;
-		int Lspeed = -10 * distance;
-		leftMotor.setSpeed(Rspeed);
-		rightMotor.setSpeed(Lspeed);
+		
+		
+		double topspeed=600;
+		double error = wallDistance- this.distance;
+		int Yinter= sweetspeed;
+		double LerrorTop= wallDistance;
+		double RerrorTop = -255;
+		
+		
+		
+		double La= (topspeed-sweetspeed)/LerrorTop;
+		int Lspeed= (int)Math.round((La*error)+Yinter);
+		if(Lspeed<0)
+		{
+			Lspeed=0;
+		}
+		
+		double Ra = (topspeed-sweetspeed)/RerrorTop;
+		int Rspeed = (int)Math.round((Ra*error)+Yinter);
+		if(Rspeed<0)
+		{
+			Rspeed=0;
+		}
+		
+		else
+		{
+			leftMotor.setSpeed(Lspeed);
+			rightMotor.setSpeed(Rspeed);
+		}
+		if (error>(-15)&& error<0)
+		{
+			leftMotor.setSpeed(sweetspeed);
+			rightMotor.setSpeed(sweetspeed);
+		}
 		leftMotor.forward();
 		rightMotor.forward();
+		
+		
 		
 		
 		

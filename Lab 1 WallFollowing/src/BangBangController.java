@@ -3,10 +3,10 @@ import lejos.nxt.*;
 public class BangBangController implements UltrasonicController{
 	private final int bandCenter, bandwith;
 	private final int motorLow, motorHigh;
-	private final int motorStraight = 100;
+	private final int motorStraight = 300;
 	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
 	private final int BangBangConstant=5;
-	private final int wallDistance=30;
+	private final int wallDistance=40;
 	
 	boolean isBack = false;
 	private int distance;
@@ -47,9 +47,10 @@ public class BangBangController implements UltrasonicController{
 				if (distance < 10)
 				{
 					leftMotor.setSpeed(motorStraight);
-					rightMotor.backward();
+					rightMotor.setSpeed(20);
 					isBack = true; 
 					leftMotor.forward();
+					rightMotor.forward();
 				}
 				else
 				if (isBack)
@@ -59,7 +60,7 @@ public class BangBangController implements UltrasonicController{
 				
 				{
 					//decrease rotation of outer wheel
-					leftMotor.setSpeed(motorHigh);
+					leftMotor.setSpeed(motorHigh+75);
 					rightMotor.setSpeed(motorStraight);
 					leftMotor.forward();
 					rightMotor.forward();
