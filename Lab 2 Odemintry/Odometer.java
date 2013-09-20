@@ -42,22 +42,25 @@ public class Odometer extends Thread {
 		{
 			updateStart = System.currentTimeMillis();
 			// put (some of) your odometer code here
-
+			double tachoR = Math.toRadians(rightMotor.getTachoCount())-rLastTachoCount;
+			double tachoL= Math.toRadians(leftMotor.getTachoCount())-lLastTachoCount;
+			changeInDistance = ((tachoL*lWheelRadius)+(tachoR*rWheelRadius))/2;
+			
+			changeInAngle = ((tachoL* lWheelRadius)-(tachoR*rWheelRadius))/wheelDistance;
+			
+			
 			synchronized (lock) 
 			{
-				
-				changeInDistance = ((Math.toRadians(leftMotor.getTachoCount())-lLastTachoCount*lWheelRadius)+(Math.toRadians(rightMotor.getTachoCount())-rLastTachoCount*rWheelRadius))/2;
-				
-				changeInAngle = (((Math.toRadians(leftMotor.getTachoCount())-lLastTachoCount*lWheelRadius))-(Math.toRadians(rightMotor.getTachoCount())-rLastTachoCount*rWheelRadius));
 				
 				x+=changeInDistance*Math.cos(theta+(changeInAngle/2));
 				y+=changeInDistance*Math.sin(theta+(changeInAngle/2));
 				theta+=changeInAngle;
-				lLastTachoCount = Math.toRadians(leftMotor.getTachoCount());
-				rLastTachoCount = Math.toRadians(rightMotor.getTachoCount());
+				
 				// don't use the variables x, y, or theta anywhere but here!
 				
 			}
+			lLastTachoCount = Math.toRadians(leftMotor.getTachoCount());
+			rLastTachoCount = Math.toRadians(rightMotor.getTachoCount());
 
 			// this ensures that the odometer only runs once every period
 			updateEnd = System.currentTimeMillis();
