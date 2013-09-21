@@ -1,3 +1,9 @@
+import lejos.nxt.ColorSensor;
+import lejos.nxt.LCD;
+import lejos.nxt.LightSensor;
+import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
+
 /* 
  * OdometryCorrection.java
  */
@@ -5,28 +11,49 @@
 public class OdometryCorrection extends Thread {
 	private static final long CORRECTION_PERIOD = 10;
 	private Odometer odometer;
-
+	private ColorSensor lightMan = new ColorSensor(SensorPort.S1);
+	private final int minChangeToIndicateLine=50;
 	// constructor
-	public OdometryCorrection(Odometer odometer) {
+	public OdometryCorrection(Odometer odometer) 
+	{
 		this.odometer = odometer;
+	}
+	public int getLightReading()
+	{
+		return lightMan.getNormalizedLightValue();
 	}
 
 	// run method (required for Thread)
-	public void run() {
+	public void run() 
+	{
 		long correctionStart, correctionEnd;
+		lightMan.setFloodlight(true);
+		int lightValue = lightMan.getNormalizedLightValue();
+		int changeInLightValue;
 
-		while (true) {
+		while (true) 
+		{
 			correctionStart = System.currentTimeMillis();
-
+			LCD.drawString( Integer.toString( lightMan.getNormalizedLightValue()) ,0,3);
 			// put your correction code here
-
+			changeInLightValue = lightValue - lightMan.getNormalizedLightValue();
+			LCD.drawString( Integer.toString(changeInLightValue ) ,0,4);
+			lightValue = lightMan.getNormalizedLightValue();
+			if(Math.abs(changeInLightValue) > minChangeToIndicateLine)
+			{
+				Sound.beep();
+			}
+			
 			// this ensure the odometry correction occurs only once every period
 			correctionEnd = System.currentTimeMillis();
-			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
-				try {
-					Thread.sleep(CORRECTION_PERIOD
-							- (correctionEnd - correctionStart));
-				} catch (InterruptedException e) {
+			if (correctionEnd - correctionStart < CORRECTION_PERIOD) 
+			{
+				try 
+				{
+					Thread.sleep(CORRECTION_PERIOD- (correctionEnd - correctionStart));
+				} 
+				catch (InterruptedException e) 
+				{
 					// there is nothing to be done here because it is not
 					// expected that the odometry correction will be
 					// interrupted by another thread

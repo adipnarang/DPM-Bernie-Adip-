@@ -11,9 +11,9 @@ public class Odometer extends Thread {
 	// robot position
 	private double x, y, theta,rLastTachoCount,lLastTachoCount,changeInDistance,changeInAngle;
 	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
-	private final double wheelDistance = 16.2;//centre to centre
-	private final double rWheelRadius = 2.1;
-	private final double lWheelRadius = 2.1;
+	private final double wheelDistance = 15.1;//centre to centre
+	private final double rWheelRadius = 2.155;
+	private final double lWheelRadius = 2.155;
 	
 	// odometer update period, in ms
 	private static final long ODOMETER_PERIOD = 25;
@@ -28,8 +28,8 @@ public class Odometer extends Thread {
 		theta = 0.0;
 		lLastTachoCount = 0.0;
 		rLastTachoCount = 0.0;
-		rightMotor.resetTachoCount();
-		leftMotor.resetTachoCount();
+		//rightMotor.resetTachoCount();
+		//leftMotor.resetTachoCount();
 		lock = new Object();
 	}
 
@@ -37,13 +37,16 @@ public class Odometer extends Thread {
 	public void run() 
 	{
 		long updateStart, updateEnd;
+		double converter = Math.PI/180.0;// used to comvert to radians
 
 		while (true) 
 		{
 			updateStart = System.currentTimeMillis();
 			// put (some of) your odometer code here
-			double tachoR = Math.toRadians(rightMotor.getTachoCount())-rLastTachoCount;
-			double tachoL= Math.toRadians(leftMotor.getTachoCount())-lLastTachoCount;
+			double tachoR = (rightMotor.getTachoCount()*converter)-rLastTachoCount;
+			double tachoL= (leftMotor.getTachoCount()*converter)-lLastTachoCount;
+			lLastTachoCount = (leftMotor.getTachoCount()*converter);
+			rLastTachoCount = (rightMotor.getTachoCount()*converter);
 			changeInDistance = ((tachoL*lWheelRadius)+(tachoR*rWheelRadius))/2;
 			
 			changeInAngle = ((tachoL* lWheelRadius)-(tachoR*rWheelRadius))/wheelDistance;
@@ -52,6 +55,7 @@ public class Odometer extends Thread {
 			synchronized (lock) 
 			{
 				
+				
 				x+=changeInDistance*Math.cos(theta+(changeInAngle/2));
 				y+=changeInDistance*Math.sin(theta+(changeInAngle/2));
 				theta+=changeInAngle;
@@ -59,8 +63,7 @@ public class Odometer extends Thread {
 				// don't use the variables x, y, or theta anywhere but here!
 				
 			}
-			lLastTachoCount = Math.toRadians(leftMotor.getTachoCount());
-			rLastTachoCount = Math.toRadians(rightMotor.getTachoCount());
+			
 
 			// this ensures that the odometer only runs once every period
 			updateEnd = System.currentTimeMillis();

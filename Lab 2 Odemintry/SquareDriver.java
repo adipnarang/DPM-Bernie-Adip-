@@ -14,7 +14,8 @@ public class SquareDriver {
 			motor.stop();
 			motor.setAcceleration(3000);
 		}
-
+		rightMotor.resetTachoCount();
+		leftMotor.resetTachoCount();
 		// wait 5 seconds
 		try {
 			Thread.sleep(2000);

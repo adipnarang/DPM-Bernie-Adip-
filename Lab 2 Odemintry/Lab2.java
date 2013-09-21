@@ -11,7 +11,7 @@ public class Lab2 {
 		Odometer odometer = new Odometer();
 		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer);
 		OdometryCorrection odometryCorrection = new OdometryCorrection(odometer);
-
+		
 		do {
 			// clear the display
 			LCD.clear();
@@ -41,12 +41,12 @@ public class Lab2 {
 			// odometry correction
 			odometer.start();
 			odometryDisplay.start();
-			// odometryCorrection.start();
+			odometryCorrection.start();
 
 			// spawn a new Thread to avoid SquareDriver.drive() from blocking
 			(new Thread() {
 				public void run() {
-					SquareDriver.drive(Motor.A, Motor.C, 2.1, 2.1, 16.2);
+					SquareDriver.drive(Motor.A, Motor.C, 2.155, 2.155, 15.1);
 				}
 			}).start();
 		}
