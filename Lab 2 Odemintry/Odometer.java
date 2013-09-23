@@ -28,8 +28,8 @@ public class Odometer extends Thread {
 		theta = 0.0;
 		lLastTachoCount = 0.0;
 		rLastTachoCount = 0.0;
-		//rightMotor.resetTachoCount();
-		//leftMotor.resetTachoCount();
+		rightMotor.resetTachoCount();
+		leftMotor.resetTachoCount();
 		lock = new Object();
 	}
 
@@ -49,12 +49,11 @@ public class Odometer extends Thread {
 			rLastTachoCount = (rightMotor.getTachoCount()*converter);
 			changeInDistance = ((tachoL*lWheelRadius)+(tachoR*rWheelRadius))/2;
 			
-			changeInAngle = ((tachoL* lWheelRadius)-(tachoR*rWheelRadius))/wheelDistance;
+			changeInAngle = ((tachoR*rWheelRadius)-(tachoL* lWheelRadius))/wheelDistance;
 			
 			
 			synchronized (lock) 
 			{
-				
 				
 				x+=changeInDistance*Math.cos(theta+(changeInAngle/2));
 				y+=changeInDistance*Math.sin(theta+(changeInAngle/2));
