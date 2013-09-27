@@ -12,8 +12,8 @@ public class Odometer extends Thread {
 	private double x, y, theta,rLastTachoCount,lLastTachoCount,changeInDistance,changeInAngle;
 	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
 	private final double wheelDistance = 15.1;//centre to centre
-	private final double rWheelRadius = 2.155; 	
-	private final double lWheelRadius = 2.155;
+	private final double rWheelRadius = 2.15; 	
+	private final double lWheelRadius = 2.15;
 	
 	// odometer update period, in ms
 	private static final long ODOMETER_PERIOD = 25;
@@ -57,8 +57,12 @@ public class Odometer extends Thread {
 			{
 				//recursive relationship simply done with += and setting x,y and theta to 0 to start
 				y+=changeInDistance*Math.cos(theta+(changeInAngle/2));
-				x+=-(changeInDistance*Math.sin(theta+(changeInAngle/2)));
-				theta+=(-changeInAngle);
+				x+=(changeInDistance*Math.sin(theta+(changeInAngle/2)));
+				theta+=-(changeInAngle);
+				if (theta > 2*Math.PI ||theta < -2*Math.PI )
+				{
+				theta = 0;	
+				}
 				// don't use the variables x, y, or theta anywhere but here!
 			}
 			// this ensures that the odometer only runs once every period

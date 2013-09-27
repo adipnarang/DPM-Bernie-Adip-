@@ -2,6 +2,7 @@ import lejos.*;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
 public class main 
 {
@@ -21,10 +22,12 @@ public class main
 		Button.waitForAnyPress();
 		tracker.start();
 		odometryDisplay.start();
+		tracker.setTheta(0);
+		nav.start();
 		
-		nav.travelTo(10, 10);
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
+		
 	}
 
 }
