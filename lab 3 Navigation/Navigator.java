@@ -8,6 +8,8 @@ import lejos.nxt.Sound;
 public class Navigator extends Thread 
 {
 	private Odometer odom= null ;
+	private double []xCurrentDest= {60,30,30,60};
+	private double []yCurrentDest={30,30,60,0};
 	
 	private final int TURNSPEED=100;
 	private final int FORWARDSPEED=200;
@@ -15,9 +17,10 @@ public class Navigator extends Thread
 	private final double LWHEELRADIUS = 2.155;
 	private final double WHEELDISTANCE = 15;
 	private final double ANGLETHRESHOLD = .03;
-	private final double POSITIONTHRESHOLD = 2.5;
+	private final double POSITIONTHRESHOLD = 2.8;
 	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
 	
+	Object lock;
 	//default constructor
 	public Navigator()
 	{
@@ -28,8 +31,27 @@ public class Navigator extends Thread
 		odom = o;
 	}
 	
+	public double[]  getXDest()
+	{
+		synchronized (lock) 
+		{
+			return this.xCurrentDest;
+		}
+		
+	}
+	
+	public double[]  getYDest()
+	{
+		synchronized (lock) 
+		{
+			return this.yCurrentDest;
+		}
+		
+	}
+	
 	public void run()
 	{
+			
 			travelTo(60,30);
 			travelTo(30,30);
 			travelTo(30,60);
