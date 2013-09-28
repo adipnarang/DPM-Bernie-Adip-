@@ -10,7 +10,7 @@ public class ObsticleDetector extends Thread
 	private UltrasonicSensor us;
 	private NXTRegulatedMotor usSpinner;
 	private Navigator nav;
-	private int tooClose = 5;
+	private int tooClose = 20;
 	private int filterControl = 0;
 	private int distance;
 	private int ORIGINPOSITION;
@@ -30,6 +30,8 @@ public class ObsticleDetector extends Thread
 	
 	public void run()
 	{
+		while(true)
+		{
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
@@ -37,6 +39,7 @@ public class ObsticleDetector extends Thread
 			//e.printStackTrace();
 		}
 		processUSData(us.getDistance());// TODO Auto-generated method stub
+		}
 	}
 	
 	private boolean isSensorStraight()
@@ -59,9 +62,8 @@ public class ObsticleDetector extends Thread
 	
 	public void processUSData(int distance) 
 	{
-	while(true)
-	{
-		LCD.drawInt(distance, 0, 5);
+	
+		LCD.drawInt(this.distance, 0, 5);
 		// rudimentary filter
 		if (distance == 255 && filterControl < FILTER_OUT) 
 		{
@@ -80,7 +82,7 @@ public class ObsticleDetector extends Thread
 					this.distance = distance;
 				}
 		
-		if (this.distance > tooClose)
+		if (this.distance > tooClose && this.distance<255)
 		{
 			if(!isSensorStraight())
 			{
@@ -95,29 +97,24 @@ public class ObsticleDetector extends Thread
 		}
 		else
 		{
-			Sound.beepSequenceUp();
+			//Sound.beepSequenceUp();
 			if(isSensorStraight())
 			{
 				turnSensorToAngeledPosition();
 			}
 			
-			if (nav.isAlive())//put if nav isAlive
+			if (nav.isNaviagating())//put if nav isAlive
 			{
-				//stopnav
-				while (this.distance<tooClose)
-				{
-					//try {nav.stop();}catch (Exception e) {}
-					
-					
-					
-				}
+				//Sound.beepSequenceUp();
+				
 				
 				
 			}
+			
 			//turn sensor on an angle 
 			//go around opsticle aka turn on bang bang until sensor reads 255 then turn nav back on 
 		}
-	}
+	
 	}
 	
 	private void bangBangFollower()

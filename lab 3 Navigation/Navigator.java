@@ -4,21 +4,31 @@ import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.SensorPort;
 import lejos.nxt.Sound;
+import lejos.nxt.UltrasonicSensor;
 public class Navigator extends Thread 
 {
+	private static final SensorPort usPort = SensorPort.S1;
+	private static final UltrasonicSensor usSensor = new UltrasonicSensor(usPort);
+	
 	private Odometer odom= null ;
 	private double []xCurrentDest= {60,30,30,60};
 	private double []yCurrentDest={30,30,60,0};
+	private int distance;
+	private int tooClose = 15;
+	private final int FILTER_OUT = 20;
+	private int filterControl = 0;
 	
+	private boolean isNavigating= false;
 	private final int TURNSPEED=100;
 	private final int FORWARDSPEED=200;
 	private final double RWHEELRADIUS = 2.155;
 	private final double LWHEELRADIUS = 2.155;
-	private final double WHEELDISTANCE = 15;
+	private final double WHEELDISTANCE = 2;
 	private final double ANGLETHRESHOLD = .03;
 	private final double POSITIONTHRESHOLD = 2.8;
-	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
+	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C, sensorMotor = Motor.B;
 	
 	Object lock;
 	//default constructor
@@ -52,10 +62,11 @@ public class Navigator extends Thread
 	public void run()
 	{
 			
-			travelTo(60,30);
-			travelTo(30,30);
-			travelTo(30,60);
-			travelTo(60,0);		
+			travelTo(60,60);
+			travelTo(60,0);
+			//travelTo(30,60);
+			//travelTo(60,0);
+			
 	}
 	
 	// this method is the method that is called in the run of this thread it turns to the correct angle the starts moving forward. while moving forward it 
@@ -67,21 +78,42 @@ public class Navigator extends Thread
 		
 		double trackAngle =calOptimalAngle(calDestAngle(x, y));
 		turnTo(trackAngle);
-		 
+		boolean hitwall=false;
 		while((Math.abs(x-odom.getX())>POSITIONTHRESHOLD || Math.abs(y-odom.getY())>POSITIONTHRESHOLD))
 		{
 			
-			goStraight();
-			if(!isAngleOk(trackAngle));
+			isNavigating = true;
+			if((usSensor.getDistance())<tooClose)
 			{
-				//Sound.beepSequence();
-				ajust(trackAngle);
+				goAroundWall(usSensor.getDistance());
+				hitwall= true;
 			}
+			else
+			{
+				if(hitwall)
+				{
+					turnTo(calOptimalAngle(calDestAngle(x, y)));
+					hitwall = false;
+				}
+				
+				goStraight();
+				if(!isAngleOk(trackAngle));
+				{
+					//Sound.beepSequence();
+					ajust(trackAngle);
+				}
 			
+			}
 		}
 		
-		stop();
+		stopMotors();
 	}
+	
+	public boolean isNaviagating()
+	{
+		return isNavigating;
+	}
+	
 	
 	//method simply tells robot to go straight
 	public void goStraight()
@@ -93,7 +125,7 @@ public class Navigator extends Thread
 	}
 	
 	//method that makes wheels stop
-	public void stop()
+	public void stopMotors()
 	{
 		leftMotor.stop();
 		rightMotor.stop();
@@ -117,7 +149,7 @@ public class Navigator extends Thread
 				leftMotor.forward();
 				rightMotor.backward();	
 			}
-			stop();
+			stopMotors();
 		}
 		
 		if (theta < 0)//if optimal is negative this means it is turning counterclockwise
@@ -131,7 +163,7 @@ public class Navigator extends Thread
 				rightMotor.forward();
 				leftMotor.backward();
 			}
-			stop();
+			stopMotors();
 		}
 		
 	}
@@ -209,4 +241,93 @@ public class Navigator extends Thread
 			return false;
 		}
 	}	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public int returnUSData(int distance) 
+	{
+	
+		
+		// rudimentary filter
+		if (distance == 255 && filterControl < FILTER_OUT) 
+		{
+			// bad value, do not set the distance var, however do increment the filter value
+			filterControl ++;
+		} 
+			else if (distance == 255)
+			{
+				// true 255, therefore set distance to 255
+				this.distance = distance;
+			} 
+				else 
+				{
+					// distance went below 255, therefore reset everything.
+					filterControl = 0;
+					this.distance = distance;
+				}
+		return this.distance;
+		
+	
+	}
+	
+	public void goAroundWall(int distance)
+	{
+		if (this.distance > tooClose)
+		{
+			
+		}
+		else
+		{
+			LCD.drawInt(this.distance, 0, 5);
+			stopMotors();
+			turnTo(Math.PI/2);
+			sensorMotor.rotate(-90);
+			//sensorMotor.
+			distance = (usSensor.getDistance());
+			while (distance<200)
+			{
+				LCD.drawInt(this.distance, 0, 5);
+				distance = (usSensor.getDistance());
+				goStraight();
+				
+			}
+			int i=0;
+			while (i < 50) 
+			{
+				goStraight();
+				i++;
+				
+			}
+			//Sound.beep();
+			stopMotors();
+			turnTo(-Math.PI/2);
+			sensorMotor.rotate(70);
+			while (distance<200)
+			{
+				LCD.drawInt(this.distance, 0, 5);
+				distance = (usSensor.getDistance());
+				goStraight();
+				
+			}
+			stopMotors();
+			//turn sensor on an angle 
+			//go around opsticle aka turn on bang bang until sensor reads 255 then turn nav back on 
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
