@@ -8,7 +8,6 @@ public class Lab1 {
 	
 	private static final int bandCenter = 20, bandWidth = 3;
 	private static final int motorLow = 50, motorHigh = 500;
-	private static final char outerWheel = 'r';
 	
 	public static void main(String [] args) {
 		/*
@@ -23,7 +22,7 @@ public class Lab1 {
 			option = Button.waitForAnyPress();
 		
 		// Setup controller objects
-		BangBangController bangbang = new BangBangController(bandCenter, bandWidth, motorLow, motorHigh,outerWheel);
+		BangBangController bangbang = new BangBangController(bandCenter, bandWidth, motorLow, motorHigh);
 		PController p = new PController(bandCenter, bandWidth);
 		
 		// Setup ultrasonic sensor

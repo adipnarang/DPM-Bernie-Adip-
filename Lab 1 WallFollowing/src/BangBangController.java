@@ -1,19 +1,21 @@
 import lejos.nxt.*;
 
 public class BangBangController implements UltrasonicController{
+	
+	//constants
 	private final int bandCenter, bandwith;
 	private final int motorLow, motorHigh;
 	private final int motorStraight = 300;
 	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.C;
+	//constant used that dictates how much should be dictated as negligible 
 	private final int BangBangConstant=5;
-	private final int wallDistance=40;
+	private final int wallDistance=30;
 	
-	boolean isBack = false;
 	private int distance;
 	private int currentLeftSpeed;
-	private char outerwheel;
 	
-	public BangBangController(int bandCenter, int bandwith, int motorLow, int motorHigh,char outerwheel) {
+	
+	public BangBangController(int bandCenter, int bandwith, int motorLow, int motorHigh) {
 		//Default Constructor
 		this.bandCenter = bandCenter;
 		this.bandwith = bandwith;
@@ -24,66 +26,61 @@ public class BangBangController implements UltrasonicController{
 		leftMotor.forward();
 		rightMotor.forward();
 		currentLeftSpeed = 0;
-		this.outerwheel=outerwheel;
+		
 	}
 	
 	@Override
 	public void processUSData(int distance) {
+		//setting variables that will be used
 		this.distance = distance;
 		int error = distance - wallDistance;
 		int threshHold = BangBangConstant;
+		
+		//if the error is negligible go forward
 		if(Math.abs(error)<threshHold)
 		{
 			leftMotor.setSpeed(motorStraight);
 			rightMotor.setSpeed(motorStraight);
 			leftMotor.forward();
 			rightMotor.forward();
-			//do nothing its negligible
+			
 		}
 		else
-			if (error > 0 )
+			if (error > 0 )//slow inside wheel to move farther from wall
 			{
 				
-				if (distance < 10)
-				{
-					leftMotor.setSpeed(motorStraight);
-					rightMotor.setSpeed(20);
-					isBack = true; 
-					leftMotor.forward();
-					rightMotor.forward();
-				}
-				else
-				if (isBack)
-				{
-					rightMotor.stop();
-				}
-				
-				{
 					//decrease rotation of outer wheel
-					leftMotor.setSpeed(motorHigh+75);
-					rightMotor.setSpeed(motorStraight);
-					leftMotor.forward();
+					rightMotor.setSpeed(motorHigh+75);
+					leftMotor.setSpeed(motorStraight);
 					rightMotor.forward();
-				}
+					leftMotor.forward();
+				
 			}
 			else
-				if(error < 0)
+				if(error < 0)//increase rotation of outside wheel to move closer to wall
 				{
 					
+					//else//normal turn
 					{
-						//increase rotation of outside wheel
-						leftMotor.setSpeed(motorStraight);
-						rightMotor.setSpeed(motorHigh);
-						leftMotor.forward();
+						rightMotor.setSpeed(motorStraight);
+						leftMotor.setSpeed(motorHigh);
 						rightMotor.forward();
+						leftMotor.forward();
 					}
 				}
 				else
 				{
-					//error == 0 ..... shouldnt realy happen
+					//error == 0 ..... shouldnt realy happen... within threshold
 				}
 				//a
-		
+		if (distance < 10)//very close take drastic measures
+		{
+			rightMotor.rotate(-45);
+			leftMotor.setSpeed(50);
+			rightMotor.setSpeed(0);
+			leftMotor.forward();
+			rightMotor.forward();
+		}
 		// TODO: process a movement based on the us distance passed in (BANG-BANG style)
 		
 	}

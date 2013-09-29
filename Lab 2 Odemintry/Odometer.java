@@ -23,12 +23,13 @@ public class Odometer extends Thread {
 
 	// default constructor
 	public Odometer() {
-		x = 0.0;
+		//starts at origin therefore all variables set to 0
+		x = 0.0; 
 		y = 0.0;
 		theta = 0.0;
-		lLastTachoCount = 0.0;
+		lLastTachoCount = 0.0;//always starts at origin always starts at 0 
 		rLastTachoCount = 0.0;
-		rightMotor.resetTachoCount();
+		rightMotor.resetTachoCount();//resetting tachometer to make sure it starts at 0
 		leftMotor.resetTachoCount();
 		lock = new Object();
 	}
@@ -43,10 +44,10 @@ public class Odometer extends Thread {
 		{
 			updateStart = System.currentTimeMillis();
 			// put (some of) your odometer code here
-			double tachoR = (rightMotor.getTachoCount()*converter)-rLastTachoCount;
-			double tachoL= (leftMotor.getTachoCount()*converter)-lLastTachoCount;
-			lLastTachoCount = (leftMotor.getTachoCount()*converter);
-			rLastTachoCount = (rightMotor.getTachoCount()*converter);
+			double tachoR = (rightMotor.getTachoCount()*converter)-rLastTachoCount;//current count - last count in order to get change in wheel rotation 
+			double tachoL= (leftMotor.getTachoCount()*converter)-lLastTachoCount;//current count - last count in order to get change in wheel rotation
+			lLastTachoCount = (leftMotor.getTachoCount()*converter);//setting last count to the current count for next iteration 
+			rLastTachoCount = (rightMotor.getTachoCount()*converter);//setting last count to the current count for next iteration 
 			changeInDistance = ((tachoL*lWheelRadius)+(tachoR*rWheelRadius))/2;
 			
 			changeInAngle = ((tachoR*rWheelRadius)-(tachoL* lWheelRadius))/wheelDistance;
@@ -54,16 +55,12 @@ public class Odometer extends Thread {
 			
 			synchronized (lock) 
 			{
-				
-				x+=changeInDistance*Math.cos(theta+(changeInAngle/2));
-				y+=changeInDistance*Math.sin(theta+(changeInAngle/2));
+				//recursive relationship simply done with += and setting x,y and theta to 0 to start
+				y+=changeInDistance*Math.cos(theta+(changeInAngle/2));
+				x+=-(changeInDistance*Math.sin(theta+(changeInAngle/2)));
 				theta+=changeInAngle;
-				
 				// don't use the variables x, y, or theta anywhere but here!
-				
 			}
-			
-
 			// this ensures that the odometer only runs once every period
 			updateEnd = System.currentTimeMillis();
 			if (updateEnd - updateStart < ODOMETER_PERIOD) {
