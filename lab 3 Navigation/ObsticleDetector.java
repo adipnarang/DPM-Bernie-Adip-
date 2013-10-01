@@ -106,8 +106,8 @@ public class ObsticleDetector extends Thread
 			if (nav.isNaviagating())//put if nav isAlive
 			{
 				//Sound.beepSequenceUp();
-				
-				
+				nav.run=false;
+				//go aroundwall
 				
 			}
 			
