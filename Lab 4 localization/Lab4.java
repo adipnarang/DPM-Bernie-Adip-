@@ -21,7 +21,7 @@ public class Lab4 {
 		RConsole.println("waiting for button press");
 		RConsole.println(Integer.toString(us.getDistance()));
 		Button.waitForAnyPress();
-		//usl.doLocalization();
+		usl.doLocalization();
 		
 		// perform the light sensor localization
 		LightLocalizer lsl = new LightLocalizer(odo, ls);

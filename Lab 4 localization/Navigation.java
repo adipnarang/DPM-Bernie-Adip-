@@ -14,8 +14,8 @@ public class Navigation {
 	private final int TOOCLOSE = 15;
 	private final int TURNSPEED=100;
 	private final int FORWARDSPEED=200;
-	private final double ANGLETHRESHOLD = .05;//threshold to which the robot will correct its angle *in rads
-	private final double POSITIONTHRESHOLD = 2.8;//threshold to which robot will correct its position *in cm 
+	private final double ANGLETHRESHOLD = .08;//threshold to which the robot will correct its angle *in rads
+	private final double POSITIONTHRESHOLD = 2.0;//threshold to which robot will correct its position *in cm 
 	private final NXTRegulatedMotor leftMotor, rightMotor; 
 	
 	// forward and rotational speeds in cm / s and degrees / s, respectively
@@ -26,7 +26,7 @@ public class Navigation {
 		rightMotor=r;
 	}
 	
-	public void travelTo(int x, int y)
+	public void travelTo(double x, double y)
 	{	 
 		LCD.drawString(Double.toString(calOptimalAngle(calDestAngle(x, y))), 0, 3);
 		
@@ -100,8 +100,14 @@ public class Navigation {
 			Sound.buzz();
 			rightMotor.setSpeed(TURNSPEED);
 			leftMotor.setSpeed(TURNSPEED);
+			double diff = (originalAngle + theta);
+			RConsole.println(Double.toString(originalAngle)+"<-oa---theta->"+Double.toString(theta));
+			if(diff> 2*Math.PI)
+			{
+				diff = diff - (2*Math.PI);
+			}
 			//as  long as the angle does not equal close to the original angle plus the optimal turning angle keep turning
-			while(Math.abs(Math.toRadians(odom.getTheta()) - (originalAngle + theta))>.025)
+			while(Math.abs(Math.toRadians(odom.getTheta()) - (diff))>.025)
 			{
 				rightMotor.forward();
 				leftMotor.backward();
@@ -121,13 +127,15 @@ public class Navigation {
 		{
 			op += -2*Math.PI;
 		}
+		RConsole.println(Double.toString(op));
+		Button.waitForAnyPress();
 		return op;
 		
 	}
 	
 	// calculating the destination angle as specified in tutorial notes but with a slight twist in the math
 	//**** note origin is considered where robot is facing when it begins its journey
-	public double calDestAngle(int xDest,int yDest)
+	public double calDestAngle(double xDest,double yDest)
 	{
 		double odomAngle = Math.toRadians(odom.getTheta());//current position
 		double dAngle = 0 ;//angle to get to
@@ -137,17 +145,17 @@ public class Navigation {
 		double changeX = (xDest-x);
 		if (changeY>0)
 		{
-			dAngle = Math.atan(( changeX/changeY));//math.atan returns radians
+			dAngle = Math.atan(( changeY/changeX));//math.atan returns radians
 		}
 		else
 		{
 			if (x<0)
 			{
-				dAngle = Math.atan(( changeX/changeY))-Math.PI;//math.atan returns radians
+				dAngle = Math.atan(( changeY/changeX))-Math.PI;//math.atan returns radians
 			}
 			else
 			{
-				dAngle = Math.atan(( changeX/changeY))+Math.PI;
+				dAngle = Math.atan(( changeY/changeX))+Math.PI;
 			}
 		}
 		Sound.beep();
@@ -184,5 +192,22 @@ public class Navigation {
 			return false;
 		}
 	}	
+	
+	//help robot get out of trouble when going around obsticle. give it some leway not to cut is so close
+	//mostly needed because the sensor is in front of the robot 
+	public void travelSetDistanceStraight(double d)
+		{
+			Sound.beep();
+			double startingX = odom.getX();
+			double startingY = odom.getY();
+			
+			while ((Math.pow(odom.getX()-startingX, 2) + Math.pow(odom.getY()-startingY, 2)) < Math.pow(d, 2))
+			{
+				goStraight();
+			}
+			stopMotors();
+		}
+		
+
 }
 

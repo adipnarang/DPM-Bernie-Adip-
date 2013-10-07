@@ -7,7 +7,7 @@ import lejos.nxt.comm.RConsole;
 public class USLocalizer {
 	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
 	public static double ROTATION_SPEED = 30;
-	private int EDGE_BOUNDRY = 70;
+	private int EDGE_BOUNDRY = 50;
 	
 	private int yD,xD,distance;
 	private double yTheta,xTheta,wideAngle;
@@ -31,6 +31,7 @@ public class USLocalizer {
 	
 	public void doLocalization() 
 	{
+		int SPEED = 150;
 		int wall = getFilteredData();
 		while(wall>200 ||wall == 0)
 		{
@@ -50,7 +51,7 @@ public class USLocalizer {
 		{
 			Sound.beep();
 			RConsole.println(Integer.toString(getFilteredData()));
-			setSpeed(100);
+			setSpeed(SPEED);
 			//robot.setSpeeds(10, 10);
 			int distance =getFilteredData();
 			while(distance<EDGE_BOUNDRY)
@@ -63,7 +64,7 @@ public class USLocalizer {
 			stopMotors();
 			RConsole.println("stopped-"+Integer.toString(distance));
 			double thetaOne = odo.getTheta();
-			setSpeed(100);
+			setSpeed(SPEED);
 			while(distance>EDGE_BOUNDRY)
 			{
 				RConsole.println(Integer.toString(distance));
@@ -88,7 +89,7 @@ public class USLocalizer {
 			
 			Sound.buzz();
 			RConsole.println(Integer.toString(getFilteredData()));
-			setSpeed(150);
+			setSpeed(SPEED);
 			int distance =getFilteredData();
 			while(distance>EDGE_BOUNDRY)
 			{
@@ -102,14 +103,14 @@ public class USLocalizer {
 			RConsole.println("stoped-"+Integer.toString(distance));
 			Sound.beep();
 			stopMotors();
-			setSpeed(100);
+			setSpeed(SPEED);
 			while(distance <EDGE_BOUNDRY)
 			{
 				RConsole.println(Integer.toString(distance));
 				turnCounterClockwise();
 				distance = getFilteredData();
 			}
-			setSpeed(100);
+			setSpeed(SPEED);
 			while(distance>EDGE_BOUNDRY)
 			{
 				RConsole.println(Integer.toString(distance));
@@ -138,16 +139,19 @@ public class USLocalizer {
 		odo.setX(x);
 		odo.setY(y);
 		RConsole.println("ended"+ Double.toString(y)+"****"+Double.toString(x));
-		//nav.travelTo(15, 15);
-		//nav.turnTo(nav.calOptimalAngle(nav.calDestAngle(60,60)));
-		nav.travelTo(30, 30);//in respect to bottom corner
+		double trackAngle =nav.calOptimalAngle(nav.calDestAngle(odo.getX(), odo.getY()+10));//store the angle it is supposed to turning by 
+		nav.turnTo(trackAngle-Math.PI/2);
+		//nav.travelTo(odo.getX(), odo.getY()+10);
+		//nav.turnTo(nav.calOptimalAngle(nav.calDestAngle(odo.getX(),odo.getY()+20)));
+		Button.waitForAnyPress();
+		nav.travelTo(25, 25);//in respect to bottom corner
 	}
 	
 	private int getFilteredData() 
 	{
 		int distance;
 		// wait for the ping to complete
-		try { Thread.sleep(10); } catch (InterruptedException e) {}
+		try { Thread.sleep(50); } catch (InterruptedException e) {}
 		
 		// there will be a delay here
 		
