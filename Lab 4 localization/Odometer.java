@@ -1,8 +1,8 @@
 import lejos.util.Timer;
 import lejos.util.TimerListener;
-
+//just added getters and setters
 public class Odometer implements TimerListener {
-	public static final int DEFAULT_PERIOD = 5;
+	public static final int DEFAULT_PERIOD = 2;
 	private TwoWheeledRobot robot;
 	private Timer odometerTimer;
 	//private Navigation nav;

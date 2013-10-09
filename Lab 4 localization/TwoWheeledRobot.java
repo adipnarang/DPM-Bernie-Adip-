@@ -1,8 +1,8 @@
 import lejos.nxt.NXTRegulatedMotor;
-
+//only here because odometer uses it 
 public class TwoWheeledRobot {
-	public static final double DEFAULT_LEFT_RADIUS = 2.15;
-	public static final double DEFAULT_RIGHT_RADIUS = 2.15;
+	public static final double DEFAULT_LEFT_RADIUS = 2.1;
+	public static final double DEFAULT_RIGHT_RADIUS = 2.1;
 	public static final double DEFAULT_WIDTH = 16.5;
 	private NXTRegulatedMotor leftMotor, rightMotor;
 	private double leftRadius, rightRadius, width;

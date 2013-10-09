@@ -11,14 +11,13 @@ import lejos.util.Delay;
 
 public class Navigation {
 	private Odometer odom;
-	private final int TOOCLOSE = 15;
 	private final int TURNSPEED=100;
-	private final int FORWARDSPEED=200;
-	private final double ANGLETHRESHOLD = .08;//threshold to which the robot will correct its angle *in rads
-	private final double POSITIONTHRESHOLD = 2.0;//threshold to which robot will correct its position *in cm 
+	private int FORWARDSPEED=200;
+	private final double ANGLETHRESHOLD = .03;//threshold to which the robot will correct its angle *in rads
+	private final double POSITIONTHRESHOLD = 3.0;//threshold to which robot will correct its position *in cm 
 	private final NXTRegulatedMotor leftMotor, rightMotor; 
 	
-	// forward and rotational speeds in cm / s and degrees / s, respectively
+	// constructor
 	public Navigation(Odometer o,NXTRegulatedMotor l,NXTRegulatedMotor r)
 	{
 		odom = o;
@@ -32,7 +31,6 @@ public class Navigation {
 		
 		double trackAngle =calOptimalAngle(calDestAngle(x, y));//store the angle it is supposed to turning by 
 		turnTo(trackAngle);
-		boolean hitwall=false;// initialize that it has not hit a wall to begin with
 		while((Math.abs(x-odom.getX())>POSITIONTHRESHOLD || Math.abs(y-odom.getY())>POSITIONTHRESHOLD) )
 		{
 			
@@ -80,6 +78,7 @@ public class Navigation {
 			leftMotor.setSpeed(TURNSPEED);
 			double diff = (originalAngle + theta);
 			RConsole.println(Double.toString(originalAngle)+"<-oa---theta->"+Double.toString(theta));
+			//if diff is greater then 2 pi subtract two pi whats left is the correct angle
 			if(diff> 2*Math.PI)
 			{
 				diff = diff - (2*Math.PI);
@@ -89,8 +88,7 @@ public class Navigation {
 			{
 				//Sound.beepSequenceUp();
 				RConsole.println(Double.toString(diff));
-				leftMotor.forward();
-				rightMotor.backward();	
+				turnClockwise();	
 			}
 			stopMotors();
 		}
@@ -109,8 +107,7 @@ public class Navigation {
 			//as  long as the angle does not equal close to the original angle plus the optimal turning angle keep turning
 			while(Math.abs(Math.toRadians(odom.getTheta()) - (diff))>.025)
 			{
-				rightMotor.forward();
-				leftMotor.backward();
+				turnCounterClockwise();
 			}
 			stopMotors();
 		}
@@ -128,7 +125,7 @@ public class Navigation {
 			op += -2*Math.PI;
 		}
 		RConsole.println(Double.toString(op));
-		Button.waitForAnyPress();
+		//Button.waitForAnyPress();
 		return op;
 		
 	}
@@ -207,7 +204,23 @@ public class Navigation {
 			}
 			stopMotors();
 		}
-		
+	public void turnClockwise()
+	{
+		leftMotor.forward();
+		rightMotor.backward();
+	}
+	public void turnCounterClockwise()
+	{
+		rightMotor.forward();
+		leftMotor.backward();
+	}
+	public void setSpeed(int speed)
+	{
+		leftMotor.setSpeed(speed);
+		rightMotor.setSpeed(speed);
+		FORWARDSPEED = speed;
+	}
+	
 
 }
 
